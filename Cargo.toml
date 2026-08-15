@@ -1,0 +1,20 @@
+# Hyperscope — full-stack performance telemetry, built on SpacetimeDB.
+#
+# Two Rust crates ship here:
+#   * hyperscope-schema    — the #[table] contract (the live source of truth that
+#                            an adopting SpacetimeDB module re-exports).
+#   * hyperscope-collector — platform-neutral vitals collection (fetch a server's
+#                            perf, normalise, call `report_game_vitals`).
+#
+# The Vue/TS panel helpers live in `panel-ts/` (an npm package, not a cargo member).
+[workspace]
+resolver = "2"
+members = ["schema", "collector-rs"]
+
+# Performance release profile (gamesense roadmap MP1). Neither crate relies on
+# catch_unwind. Note: adopting modules (e.g. cruiserd) build these crates under
+# their own workspace profile — this section governs builds from this workspace.
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"

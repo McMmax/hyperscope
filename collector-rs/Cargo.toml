@@ -1,0 +1,13 @@
+[package]
+name = "hyperscope-collector"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Hyperscope vitals collection — fetch a server's perf and report it to SpacetimeDB."
+repository = "https://github.com/mearz/Hyperscope"
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"

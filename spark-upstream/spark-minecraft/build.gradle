@@ -1,0 +1,20 @@
+plugins {
+    id 'net.fabricmc.fabric-loom'
+}
+
+tasks.withType(JavaCompile) {
+    // override, compile targeting J25
+    options.release = 25
+}
+
+repositories {
+    maven { url 'https://maven.fabricmc.net/' }
+    mavenLocal()
+}
+
+dependencies {
+    minecraft 'com.mojang:minecraft:26.2'
+
+    implementation project(':spark-common')
+}
+

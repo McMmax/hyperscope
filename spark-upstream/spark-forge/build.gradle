@@ -1,0 +1,66 @@
+plugins {
+    id 'com.gradleup.shadow'
+    id 'net.minecraftforge.gradle' version '[7.0.13,8.0)'
+}
+
+tasks.withType(JavaCompile) {
+    // override, compile targeting J25
+    options.release = 25
+}
+
+minecraft {
+    accessTransformer = true
+}
+
+configurations {
+    shade
+    implementation.extendsFrom shade
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+}
+
+dependencies {
+    implementation minecraft.dependency('net.minecraftforge:forge:26.2-65.0.0')
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.1'
+    shade project(':spark-common')
+    shade project(':spark-minecraft')
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        include 'META-INF/mods.toml'
+        expand (
+                'pluginVersion': project.pluginVersion,
+                'pluginDescription': project.pluginDescription
+        )
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'META-INF/mods.toml'
+    }
+}
+
+shadowJar {
+    archiveFileName = "spark-${project.pluginVersion}-forge.jar"
+    configurations = [project.configurations.shade]
+
+    relocate 'net.kyori.adventure', 'me.lucko.spark.lib.adventure'
+    relocate 'net.kyori.examination', 'me.lucko.spark.lib.adventure.examination'
+    relocate 'net.kyori.option', 'me.lucko.spark.lib.adventure.option'
+    relocate 'net.bytebuddy', 'me.lucko.spark.lib.bytebuddy'
+    relocate 'com.google.protobuf', 'me.lucko.spark.lib.protobuf'
+    relocate 'org.objectweb.asm', 'me.lucko.spark.lib.asm'
+    relocate 'one.profiler', 'me.lucko.spark.lib.asyncprofiler'
+    relocate 'me.lucko.bytesocks.client', 'me.lucko.spark.lib.bytesocks'
+    relocate 'org.java_websocket', 'me.lucko.spark.lib.bytesocks.ws'
+
+    project.applyExcludes(delegate)
+}
+
+artifacts {
+    archives shadowJar
+}

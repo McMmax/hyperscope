@@ -1,0 +1,89 @@
+plugins {
+    id 'dev.yumi.gradle.licenser' version '2.2.2' apply false
+    id 'com.gradleup.shadow' version '8.3.8' apply false
+    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT' apply false
+}
+
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+allprojects {
+    group = 'me.lucko'
+    version = '1.10-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'java-library'
+    apply plugin: 'dev.yumi.gradle.licenser'
+
+    ext {
+        baseVersion = '1.10'
+        patchVersion = determinePatchVersion()
+        pluginVersion = baseVersion + '.' + patchVersion
+        pluginDescription = 'spark is a performance profiling plugin/mod for Minecraft clients, servers and proxies.'
+
+        applyExcludes = { Jar jarTask ->
+            jarTask.exclude 'module-info.class'
+            jarTask.exclude 'META-INF/maven/**'
+            jarTask.exclude 'META-INF/proguard/**'
+            jarTask.exclude 'META-INF/LICENSE'
+            jarTask.exclude 'META-INF/NOTICE'
+            // protobuf
+            jarTask.exclude '**/*.proto'
+            jarTask.exclude '**/*.proto.bin'
+            // async-profiler
+            jarTask.exclude 'linux-arm64/**'
+            jarTask.exclude 'linux-x64/**'
+            jarTask.exclude 'macos/**'
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = 21
+    }
+
+    tasks.withType(Test).configureEach {
+        testLogging {
+            events = [TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED]
+            exceptionFormat = TestExceptionFormat.FULL
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+        }
+    }
+
+    processResources {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+
+    license {
+        rule(rootProject.file("HEADER.txt"))
+    }
+
+    repositories {
+        // Fix issue with lwjgl-freetype not being found on macOS / ForgeGradle issue
+        //
+        // Could not resolve all files for configuration ':_compileJava_1'.
+        // Could not find lwjgl-freetype-3.3.3-natives-macos-patch.jar (org.lwjgl:lwjgl-freetype:3.3.3).
+        maven {
+            url "https://libraries.minecraft.net"
+            content {
+                includeModule("org.lwjgl", "lwjgl-freetype")
+            }
+        }
+        mavenCentral()
+        maven { url "https://repo.lucko.me/" }
+    }
+
+}
+
+def determinePatchVersion() {
+    def tagInfo = providers.exec {
+        commandLine 'git', 'describe', '--tags'
+    }.standardOutput.asText.get().trim()
+
+    return tagInfo.contains('-') ? tagInfo.split('-')[1] : 0
+}

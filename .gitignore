@@ -1,0 +1,10 @@
+/target
+**/target
+node_modules
+dist
+*.tsbuildinfo
+.DS_Store
+
+# Gradle outputs of the JVM integration module (built from the Stomzy workspace)
+integration/build/
+integration/bin/
