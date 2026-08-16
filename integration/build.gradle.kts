@@ -18,9 +18,12 @@ plugins {
 dependencies {
     implementation(project(":")) // engine core — CommandSender/ConsoleSender
 
-    // Spark common is rebuilt against Adventure 5.1; retain its runtime graph
-    // explicitly because a flat vendored JAR has no transitive metadata.
-    api(files("libs/spark-common-adventure5.jar", "libs/spark-api-adventure5.jar"))
+    if (findProject(":hyperscope-common") != null) {
+        api(project(":hyperscope-common"))
+        api(project(":hyperscope-api"))
+    } else {
+        api(files("libs/spark-common-adventure5.jar", "libs/spark-api-adventure5.jar"))
+    }
     api("net.kyori:adventure-api:5.1.0")
     api("net.kyori:adventure-text-serializer-gson:5.1.0")
     api("net.kyori:adventure-text-serializer-legacy:5.1.0")

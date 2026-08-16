@@ -1,18 +1,25 @@
 plugins {
+    id 'java-library'
     id 'com.google.protobuf' version '0.9.5'
     id 'net.kyori.blossom' version '2.2.0'
     id 'maven-publish'
 }
 
-license {
-    exclude '**/sampler/async/jfr/**'
-    exclude {
-        it.file.toString().startsWith(buildDir.toString())
+if (project.plugins.hasPlugin('dev.yumi.gradle.licenser')) {
+    license {
+        exclude '**/sampler/async/jfr/**'
+        exclude {
+            it.file.toString().startsWith(buildDir.toString())
+        }
     }
 }
 
 dependencies {
-    api project(':spark-api')
+    if (findProject(':hyperscope-api') != null) {
+        api project(':hyperscope-api')
+    } else {
+        api project(':spark-api')
+    }
     implementation 'tools.profiler:async-profiler:4.5' // spark native version: 11aaea3 (v4.5)
     implementation 'org.ow2.asm:asm:9.7'
     implementation 'net.bytebuddy:byte-buddy-agent:1.14.17'
@@ -77,8 +84,8 @@ sourceSets {
     main {
         blossom {
             javaSources {
-                property 'version', project.pluginVersion
-                property 'description', project.pluginDescription
+                property 'version', project.hasProperty('pluginVersion') ? project.pluginVersion : '1.10.0'
+                property 'description', project.hasProperty('pluginDescription') ? project.pluginDescription : 'spark'
             }
         }
     }
@@ -102,7 +109,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             from components.java
-            version = "${project.pluginVersion}-SNAPSHOT"
+            version = "${project.hasProperty('pluginVersion') ? project.pluginVersion : '1.10.0'}-SNAPSHOT"
         }
     }
 }
