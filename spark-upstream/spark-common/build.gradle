@@ -5,6 +5,7 @@ plugins {
     id 'maven-publish'
 }
 
+
 if (project.plugins.hasPlugin('dev.yumi.gradle.licenser')) {
     license {
         exclude '**/sampler/async/jfr/**'
@@ -21,7 +22,7 @@ dependencies {
         api project(':spark-api')
     }
     implementation 'tools.profiler:async-profiler:4.5' // spark native version: 11aaea3 (v4.5)
-    implementation 'org.ow2.asm:asm:9.7'
+    implementation 'org.ow2.asm:asm:9.10.1'
     implementation 'net.bytebuddy:byte-buddy-agent:1.14.17'
     implementation 'com.google.protobuf:protobuf-javalite:4.31.1'
 
@@ -67,7 +68,12 @@ dependencies {
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:4.31.1'
+        def os = System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT)
+        def arch = System.getProperty('os.arch').toLowerCase(java.util.Locale.ROOT)
+        def classifier = os.contains('win') ? 'windows-x86_64' :
+                os.contains('mac') ? (arch.contains('aarch64') ? 'osx-aarch_64' : 'osx-x86_64') :
+                        (arch.contains('aarch64') ? 'linux-aarch_64' : 'linux-x86_64')
+        artifact = "com.google.protobuf:protoc:4.31.1:${classifier}@exe"
     }
     generateProtoTasks {
         all().each { task ->

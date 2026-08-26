@@ -111,18 +111,18 @@ public final class MethodDisambiguator {
     private ClassReader getClassReader(String className) throws IOException {
         String resource = className.replace('.', '/') + ".class";
 
-        try (InputStream is = ClassLoader.getSystemResourceAsStream(resource)) {
-            if (is != null) {
-                return new ClassReader(is);
-            }
-        }
-
         Class<?> clazz = this.classFinder.findClass(className);
         if (clazz != null) {
             try (InputStream is = clazz.getClassLoader().getResourceAsStream(resource)) {
                 if (is != null) {
                     return new ClassReader(is);
                 }
+            }
+        }
+
+        try (InputStream is = ClassLoader.getSystemResourceAsStream(resource)) {
+            if (is != null) {
+                return new ClassReader(is);
             }
         }
 
