@@ -25,8 +25,28 @@
 //!     .send().await?;
 //! ```
 
+pub mod console;
+pub mod flecs;
+pub mod instrumentation;
+pub mod metrics;
 pub mod perf;
+pub mod providers;
+pub mod pyroscope;
 pub mod report;
+pub mod sa;
+pub mod spacetimedb;
+pub mod tracy;
+pub mod ui_modules;
 
+pub use console::*;
+pub use flecs::*;
+pub use instrumentation::*;
+pub use metrics::*;
 pub use perf::{fetch_game_perf, GamePerf};
+pub use providers::*;
+pub use pyroscope::*;
 pub use report::GameVitalsArgs;
+pub use sa::*;
+pub use spacetimedb::*;
+pub use tracy::*;
+pub use ui_modules::*;
